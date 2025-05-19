@@ -1,0 +1,25 @@
+name: Ежедневное обновление новостей
+
+on:
+  schedule:
+    - cron: '0 7 * * *'  # каждый день в 7:00 UTC (10:00 по Москве)
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Клонировать репозиторий
+        uses: actions/checkout@v3
+
+      - name: Обновить триггер-файл
+        run: |
+          echo "Обновлено: $(date -u)" > update-log.txt
+
+      - name: Коммит и пуш
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git add update-log.txt
+          git commit -m "🕒 Автообновление: $(date -u)"
+          git push
