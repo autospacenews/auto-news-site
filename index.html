@@ -1,26 +1,13 @@
 <style>
-  #news {
-    max-width: 800px;
-    margin: 20px auto;
-    font-family: Arial, sans-serif;
-  }
   .news-item {
-    border-bottom: 1px solid #ddd;
-    padding: 15px 0;
+    border-bottom: 1px solid #ccc;
+    padding: 10px 0;
   }
   .news-item h3 {
     margin: 0 0 5px;
   }
-  .news-item h3 a {
-    color: #0066cc;
-    text-decoration: none;
-  }
-  .news-item h3 a:hover {
-    text-decoration: underline;
-  }
   .news-item p {
-    margin: 3px 0;
-    color: #333;
+    margin: 5px 0;
   }
 </style>
 
@@ -28,8 +15,7 @@
 
 <script>
 const rssFeeds = [
-  "https://lenta.ru/rss/news", // Работает 100%
-  // сюда позже добавим авто-ленты
+  "https://lenta.ru/rss/news"
 ];
 
 const newsContainer = document.getElementById('news');
@@ -40,41 +26,28 @@ async function fetchRSS(url) {
     const response = await fetch(proxyUrl);
     const data = await response.json();
     const parser = new DOMParser();
-    const xmlDoc = parser.parseFromString(data.contents, "text/xml");
-    const items = xmlDoc.querySelectorAll("item");
+    const xml = parser.parseFromString(data.contents, "text/xml");
+    const items = xml.querySelectorAll("item");
     return Array.from(items).slice(0, 10).map(item => ({
-      title: item.querySelector("title")?.textContent || "Без названия",
-      link: item.querySelector("link")?.textContent || "#",
-      pubDate: item.querySelector("pubDate")?.textContent || "",
-      description: item.querySelector("description")?.textContent || ""
+      title: item.querySelector("title")?.textContent,
+      link: item.querySelector("link")?.textContent,
+      pubDate: item.querySelector("pubDate")?.textContent,
+      description: item.querySelector("description")?.textContent
     }));
-  } catch (e) {
-    console.error("Ошибка при загрузке RSS:", e);
+  } catch (error) {
+    console.error("Ошибка при загрузке RSS:", error);
     return [];
   }
 }
 
 async function fetchNews() {
   newsContainer.innerHTML = '';
-  let loaded = false;
-  for (const feedUrl of rssFeeds) {
-    const articles = await fetchRSS(feedUrl);
-    if (articles.length > 0) loaded = true;
-    articles.forEach(item => {
-      const article = document.createElement('div');
-      article.className = 'news-item';
-      article.innerHTML = `
-        <h3><a href="${item.link}" target="_blank">${item.title}</a></h3>
-        <p><small>${item.pubDate}</small></p>
-        <p>${item.description}</p>
-      `;
-      newsContainer.appendChild(article);
-    });
-  }
-  if (!loaded) {
-    newsContainer.innerHTML = '<p style="color: red;">Не удалось загрузить новости. Проверь подключение или источник RSS.</p>';
-  }
-}
+  let allNews = [];
 
-fetchNews();
-</script>
+  for (const url of rssFeeds) {
+    const articles = await fetchRSS(url);
+    allNews = allNews.concat(articles);
+  }
+
+  if (allNews.length === 0) {
+    newsC
