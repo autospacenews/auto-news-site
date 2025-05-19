@@ -1,8 +1,35 @@
+<style>
+  #news {
+    max-width: 800px;
+    margin: 20px auto;
+    font-family: Arial, sans-serif;
+  }
+  .news-item {
+    border-bottom: 1px solid #ddd;
+    padding: 15px 0;
+  }
+  .news-item h3 {
+    margin: 0 0 5px;
+  }
+  .news-item h3 a {
+    color: #0066cc;
+    text-decoration: none;
+  }
+  .news-item h3 a:hover {
+    text-decoration: underline;
+  }
+  .news-item p {
+    margin: 3px 0;
+    color: #333;
+  }
+</style>
+
 <div id="news">Загрузка новостей...</div>
 
 <script>
 const rssFeeds = [
-  "https://lenta.ru/rss/news"
+  "https://lenta.ru/rss/news", // Работает 100%
+  // сюда позже добавим авто-ленты
 ];
 
 const newsContainer = document.getElementById('news');
@@ -11,12 +38,10 @@ async function fetchRSS(url) {
   const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
   try {
     const response = await fetch(proxyUrl);
-    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
     const data = await response.json();
     const parser = new DOMParser();
     const xmlDoc = parser.parseFromString(data.contents, "text/xml");
     const items = xmlDoc.querySelectorAll("item");
-    if (items.length === 0) throw new Error("Нет новостей в ленте");
     return Array.from(items).slice(0, 10).map(item => ({
       title: item.querySelector("title")?.textContent || "Без названия",
       link: item.querySelector("link")?.textContent || "#",
@@ -30,24 +55,24 @@ async function fetchRSS(url) {
 }
 
 async function fetchNews() {
-  newsContainer.innerHTML = ''; // очистить контейнер перед загрузкой
-  let anyNews = false;
+  newsContainer.innerHTML = '';
+  let loaded = false;
   for (const feedUrl of rssFeeds) {
     const articles = await fetchRSS(feedUrl);
-    if (articles.length > 0) anyNews = true;
+    if (articles.length > 0) loaded = true;
     articles.forEach(item => {
       const article = document.createElement('div');
       article.className = 'news-item';
       article.innerHTML = `
-        <h3><a href="${item.link}" target="_blank" rel="noopener noreferrer">${item.title}</a></h3>
+        <h3><a href="${item.link}" target="_blank">${item.title}</a></h3>
         <p><small>${item.pubDate}</small></p>
         <p>${item.description}</p>
       `;
       newsContainer.appendChild(article);
     });
   }
-  if (!anyNews) {
-    newsContainer.innerHTML = '<div class="news-error">Не удалось загрузить новости. Попробуйте обновить страницу позже.</div>';
+  if (!loaded) {
+    newsContainer.innerHTML = '<p style="color: red;">Не удалось загрузить новости. Проверь подключение или источник RSS.</p>';
   }
 }
 
