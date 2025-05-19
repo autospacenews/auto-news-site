@@ -1,3 +1,5 @@
+<div id="news"></div>
+
 <script>
 const rssFeeds = [
   "https://motor.ru/rss/all/",
@@ -8,29 +10,41 @@ const rssFeeds = [
 
 const newsContainer = document.getElementById('news');
 
-async function fetchNews() {
+async function fetchRSS(url) {
+  const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
   try {
-    for (const url of rssFeeds) {
-      const response = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(url)}`);
-      const data = await response.json();
-      data.items.slice(0, 5).forEach(item => {
-        const article = document.createElement('div');
-        article.className = 'news-item';
-        article.innerHTML = `
-          <h3><a href="${item.link}" target="_blank">${item.title}</a></h3>
-          <p>${item.pubDate}</p>
-          <p>${item.description}</p>
-        `;
-        newsContainer.appendChild(article);
-      });
-    }
-  } catch (error) {
-    console.error('Ошибка при загрузке новостей:', error);
+    const response = await fetch(proxyUrl);
+    const data = await response.json();
+    const parser = new DOMParser();
+    const xmlDoc = parser.parseFromString(data.contents, "text/xml");
+    const items = xmlDoc.querySelectorAll("item");
+    return Array.from(items).slice(0, 5).map(item => ({
+      title: item.querySelector("title")?.textContent || "Без названия",
+      link: item.querySelector("link")?.textContent || "#",
+      pubDate: item.querySelector("pubDate")?.textContent || "",
+      description: item.querySelector("description")?.textContent || ""
+    }));
+  } catch (e) {
+    console.error("Ошибка при загрузке RSS:", e);
+    return [];
+  }
+}
+
+async function fetchNews() {
+  for (const feedUrl of rssFeeds) {
+    const articles = await fetchRSS(feedUrl);
+    articles.forEach(item => {
+      const article = document.createElement('div');
+      article.className = 'news-item';
+      article.innerHTML = `
+        <h3><a href="${item.link}" target="_blank" rel="noopener noreferrer">${item.title}</a></h3>
+        <p><small>${item.pubDate}</small></p>
+        <p>${item.description}</p>
+      `;
+      newsContainer.appendChild(article);
+    });
   }
 }
 
 fetchNews();
 </script>
-
-<!-- Где-то в HTML-документе должен быть контейнер -->
-<div id="news"></div>
