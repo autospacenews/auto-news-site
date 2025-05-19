@@ -1,43 +1,8 @@
-<style>
-  #news {
-    max-width: 800px;
-    margin: 20px auto;
-    font-family: Arial, sans-serif;
-  }
-  .news-item {
-    border-bottom: 1px solid #ddd;
-    padding: 15px 0;
-  }
-  .news-item h3 {
-    margin: 0 0 5px;
-  }
-  .news-item h3 a {
-    color: #0066cc;
-    text-decoration: none;
-  }
-  .news-item h3 a:hover {
-    text-decoration: underline;
-  }
-  .news-item p {
-    margin: 3px 0;
-    color: #333;
-  }
-  .news-error {
-    color: red;
-    text-align: center;
-    margin: 20px;
-    font-weight: bold;
-  }
-</style>
-
 <div id="news">Загрузка новостей...</div>
 
 <script>
 const rssFeeds = [
-  "https://motor.ru/rss/all/",
-  "https://auto.mail.ru/rss/all/",
-  "https://www.autonews.ru/rss/news/",
-  "https://www.kolesa.ru/news/rss"
+  "https://lenta.ru/rss/news"
 ];
 
 const newsContainer = document.getElementById('news');
@@ -52,7 +17,7 @@ async function fetchRSS(url) {
     const xmlDoc = parser.parseFromString(data.contents, "text/xml");
     const items = xmlDoc.querySelectorAll("item");
     if (items.length === 0) throw new Error("Нет новостей в ленте");
-    return Array.from(items).slice(0, 5).map(item => ({
+    return Array.from(items).slice(0, 10).map(item => ({
       title: item.querySelector("title")?.textContent || "Без названия",
       link: item.querySelector("link")?.textContent || "#",
       pubDate: item.querySelector("pubDate")?.textContent || "",
