@@ -1,0 +1,14 @@
+[
+  {
+    "title": "Новая Lada будет электрической",
+    "link": "https://example.com/lada-ev",
+    "pubDate": "Mon, 19 May 2025 12:00:00 GMT",
+    "description": "АвтоВАЗ анонсировал полностью электрическую модель Lada будущего поколения."
+  },
+  {
+    "title": "BMW представила новое поколение M3",
+    "link": "https://example.com/bmw-m3",
+    "pubDate": "Mon, 19 May 2025 10:30:00 GMT",
+    "description": "BMW M3 получила более агрессивный дизайн и улучшенную аэродинамику."
+  }
+]

@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>AutoSpace News</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f7f7f7;
+      color: #333;
+      padding: 20px;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    nav {
+      margin-bottom: 20px;
+    }
+    .news-item {
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      padding: 15px;
+      margin-bottom: 15px;
+    }
+    .news-item h3 {
+      margin: 0 0 10px;
+    }
+    .news-item p {
+      margin: 5px 0;
+    }
+    .like-buttons button {
+      margin-right: 10px;
+    }
+    .carousel {
+      display: flex;
+      overflow-x: auto;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .carousel img {
+      height: 200px;
+      border-radius: 10px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>AutoSpace News 🚗</h1>
+    <input type="text" id="search" placeholder="Поиск новостей...">
+  </header>
+
+  <nav>
+    <button onclick="filterCategory('all')">Все</button>
+    <button onclick="filterCategory('bmw')">BMW</button>
+    <button onclick="filterCategory('автоВАЗ')">АвтоВАЗ</button>
+  </nav>
+
+  <div class="carousel">
+    <img src="https://cdn.pixabay.com/photo/2016/06/01/10/11/car-1427104_1280.jpg" alt="Car 1">
+    <img src="https://cdn.pixabay.com/photo/2017/01/06/19/15/audi-1957037_1280.jpg" alt="Car 2">
+    <img src="https://cdn.pixabay.com/photo/2016/11/29/06/17/auto-1868726_1280.jpg" alt="Car 3">
+  </div>
+
+  <div id="news">Загрузка новостей...</div>
+
+  <h2>Связаться с нами</h2>
+  <form onsubmit="submitForm(event)">
+    <input type="text" id="name" placeholder="Ваше имя" required><br><br>
+    <input type="email" id="email" placeholder="Email" required><br><br>
+    <textarea id="message" placeholder="Сообщение" required></textarea><br><br>
+    <button type="submit">Отправить</button>
+  </form>
+
+  <script>
+  async function fetchNews() {
+    const newsContainer = document.getElementById('news');
+    try {
+      const response = await fetch('rss.json');
+      const articles = await response.json();
+      newsContainer.innerHTML = '';
+      articles.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'news-item';
+        div.setAttribute('data-title', item.title.toLowerCase());
+        div.innerHTML = `
+          <h3><a href="${item.link}" target="_blank">${item.title}</a></h3>
+          <p><small>${item.pubDate}</small></p>
+          <p>${item.description}</p>
+          <div class="like-buttons">
+            <button onclick="alert('Спасибо! 👍')">👍 Нравится</button>
+            <button onclick="alert('Спасибо за честность 👎')">👎 Не нравится</button>
+          </div>
+        `;
+        newsContainer.appendChild(div);
+      });
+    } catch (error) {
+      newsContainer.innerHTML = '<p style="color:red;">Не удалось загрузить новости. Проверь подключение или источник данных.</p>';
+    }
+  }
+
+  function filterCategory(category) {
+    const items = document.querySelectorAll('.news-item');
+    items.forEach(item => {
+      if (category === 'all' || item.innerText.toLowerCase().includes(category.toLowerCase())) {
+        item.style.display = 'block';
+      } else {
+        item.style.display = 'none';
+      }
+    });
+  }
+
+  function submitForm(event) {
+    event.preventDefault();
+    alert('Спасибо за ваше сообщение! Мы скоро с вами свяжемся.');
+    document.getElementById('name').value = '';
+    document.getElementById('email').value = '';
+    document.getElementById('message').value = '';
+  }
+
+  const searchInput = document.getElementById('search');
+  searchInput.addEventListener('input', function () {
+    const value = this.value.toLowerCase();
+    document.querySelectorAll('.news-item').forEach(item => {
+      if (item.getAttribute('data-title').includes(value)) {
+        item.style.display = 'block';
+      } else {
+        item.style.display = 'none';
+      }
+    });
+  });
+
+  fetchNews();
+  </script>
+</body>
+</html>
